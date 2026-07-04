@@ -10,7 +10,7 @@ RUN java -Djarmode=tools -jar target/*.jar extract --layers --destination extrac
 
 FROM eclipse-temurin:25-jdk AS custom-jre
 RUN jlink \
-    --add-modules java.base,java.compiler,java.desktop,java.instrument,java.logging,java.management,java.naming,java.net.http,java.prefs,java.scripting,java.sql,java.xml,jdk.crypto.ec,jdk.jfr,jdk.management,jdk.unsupported \
+    --add-modules java.base,java.compiler,java.desktop,java.instrument,java.logging,java.management,java.naming,java.net.http,java.prefs,java.scripting,java.security.jgss,java.sql,java.xml,jdk.crypto.ec,jdk.jfr,jdk.management,jdk.unsupported \
     --strip-debug \
     --no-header-files \
     --no-man-pages \
@@ -29,9 +29,9 @@ COPY --from=build /workspace/extracted/spring-boot-loader/ ./
 COPY --from=build /workspace/extracted/snapshot-dependencies/ ./
 COPY --from=build /workspace/extracted/application/ ./
 
-EXPOSE 8080
+EXPOSE 8082
 
 HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=5 \
-  CMD wget -q -O - http://localhost:8080/actuator/health > /dev/null || exit 1
+  CMD wget -q -O - http://localhost:8082/actuator/health > /dev/null || exit 1
 
-ENTRYPOINT ["java", "-cp", "/app/*:/app/lib/*", "com.example.wefluxconsumer.MainApplication"]
+ENTRYPOINT ["java", "-cp", "/app/*:/app/lib/*", "com.example.mvcstreamingconsumer.MainApplication"]

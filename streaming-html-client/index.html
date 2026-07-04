@@ -12,7 +12,7 @@
   <header>
     <div>
       <h1>Wikipedia Recent Changes</h1>
-      <p class="subtitle">Live events streamed from the Spring Boot WebFlux service.</p>
+      <p class="subtitle">Live events streamed from a Spring Boot backend.</p>
     </div>
     <div id="status" class="status">
       <span class="status-dot"></span>
@@ -21,6 +21,13 @@
   </header>
 
   <section class="toolbar" aria-label="Stream controls">
+    <label>
+      Source
+      <select id="source">
+        <option value="webflux" selected>WebFlux</option>
+        <option value="mvc">MVC</option>
+      </select>
+    </label>
     <label>
       Wiki
       <input id="wiki" type="text" placeholder="enwiki">

@@ -5,6 +5,7 @@ const statusText = document.querySelector('#statusText');
 const events = document.querySelector('#events');
 const connectButton = document.querySelector('#connect');
 const disconnectButton = document.querySelector('#disconnect');
+const sourceInput = document.querySelector('#source');
 const wikiInput = document.querySelector('#wiki');
 const limitInput = document.querySelector('#limit');
 const includeBotsInput = document.querySelector('#includeBots');
@@ -24,6 +25,7 @@ function setControlState(connected) {
 
 export function getFilters() {
   return {
+    source: sourceInput.value,
     wiki: wikiInput.value.trim(),
     limit: limitInput.value.trim(),
     includeBots: includeBotsInput.checked

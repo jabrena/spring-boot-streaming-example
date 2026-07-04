@@ -71,7 +71,7 @@ h1 {
 
 .toolbar {
   display: grid;
-  grid-template-columns: minmax(160px, 1fr) minmax(120px, 160px) auto auto;
+  grid-template-columns: minmax(140px, 180px) minmax(160px, 1fr) minmax(120px, 160px) auto auto;
   gap: 12px;
   align-items: end;
   margin-bottom: 18px;
@@ -90,7 +90,8 @@ label {
 }
 
 input[type="text"],
-input[type="number"] {
+input[type="number"],
+select {
   width: 100%;
   min-height: 38px;
   border: 1px solid #c7cfdb;

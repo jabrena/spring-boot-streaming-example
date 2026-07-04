@@ -1,6 +1,10 @@
-const endpoint = 'http://localhost:8080/api/wikipedia/recent-changes';
+const endpoints = {
+  webflux: 'http://localhost:8080/api/wikipedia/recent-changes',
+  mvc: 'http://localhost:8082/api/wikipedia/recent-changes'
+};
 
 function buildUrl(filters) {
+  const endpoint = endpoints[filters.source] || endpoints.webflux;
   const url = new URL(endpoint);
 
   if (filters.wiki) {
