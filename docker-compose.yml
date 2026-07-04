@@ -1,0 +1,23 @@
+services:
+  wikipedia-service:
+    build:
+      context: ./spring-boot-weflux-consumer
+    container_name: wikipedia-service
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      start_period: 30s
+      retries: 5
+
+  streaming-html-client:
+    build:
+      context: ./streaming-html-client
+    container_name: streaming-html-client
+    depends_on:
+      wikipedia-service:
+        condition: service_healthy
+    ports:
+      - "8081:80"
