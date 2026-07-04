@@ -15,4 +15,5 @@ jobs:
           distribution: 'graalvm' # See 'Supported distributions' for available options
           java-version: '25'
       - name: Maven build
-        run: ./mvnw --batch-mode --no-transfer-progress verify --file ./spring-boot-weflux-consumer/pom.xml
+        working-directory: ./spring-boot-weflux-consumer
+        run: ./mvnw --batch-mode --no-transfer-progress verify
