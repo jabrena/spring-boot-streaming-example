@@ -27,9 +27,12 @@ services are healthy before starting.
 
 The Maven root project binds the three Spring Boot services and a shared
 `openapi-specs` module. Each service depends on that module and serves the same
-OpenAPI contract at `/openapi.yaml`. The `openapi-specs` module packages the
-contract only; each Spring service unpacks its `openapi` classifier and generates
-a local API interface during the Maven build. The MVC consumers also generate
+output OpenAPI contract at `/openapi.yaml`. The `openapi-specs` module packages
+that downstream service contract from `downstream/openapi.yaml` plus the
+upstream Wikimedia EventStreams contract in
+`upstream/wikimedia-eventstreams-openapi.yaml`. Each Spring service unpacks the
+module's `openapi` classifier and generates a local API interface from the
+downstream contract during the Maven build. The MVC consumers also generate
 local model classes, while the WebFlux consumer keeps its reactive model code
 local. All controllers implement the generated interfaces.
 
@@ -92,12 +95,18 @@ https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams_HTTP_Service
 
 ## OpenAPI And Schema
 
-Local shared OpenAPI specification:
+Local output OpenAPI specification exposed by this project:
 
 ```text
 http://localhost:8081/openapi.yaml
 http://localhost:8082/openapi.yaml
 http://localhost:8083/openapi.yaml
+```
+
+Packaged upstream input OpenAPI specification:
+
+```text
+openapi-specs/src/main/resources/upstream/wikimedia-eventstreams-openapi.yaml
 ```
 
 Wikimedia EventStreams OpenAPI:

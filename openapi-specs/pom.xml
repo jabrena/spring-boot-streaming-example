@@ -18,16 +18,31 @@
     <build>
         <resources>
             <resource>
-                <directory>src/main/resources</directory>
+                <directory>src/main/resources/downstream</directory>
+                <includes>
+                    <include>openapi.yaml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources/downstream</directory>
+                <targetPath>META-INF/resources</targetPath>
                 <includes>
                     <include>openapi.yaml</include>
                 </includes>
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
+                <includes>
+                    <include>downstream/**</include>
+                    <include>upstream/**</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
                 <targetPath>META-INF/resources</targetPath>
                 <includes>
-                    <include>openapi.yaml</include>
+                    <include>downstream/**</include>
+                    <include>upstream/**</include>
                 </includes>
             </resource>
         </resources>
@@ -45,7 +60,8 @@
                             <classifier>openapi</classifier>
                             <classesDirectory>${project.basedir}/src/main/resources</classesDirectory>
                             <includes>
-                                <include>openapi.yaml</include>
+                                <include>downstream/**</include>
+                                <include>upstream/**</include>
                             </includes>
                         </configuration>
                     </execution>
