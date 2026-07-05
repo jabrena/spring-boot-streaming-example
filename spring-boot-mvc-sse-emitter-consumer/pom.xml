@@ -94,8 +94,9 @@
                             <generatorName>spring</generatorName>
                             <output>${project.build.directory}/generated-sources/openapi</output>
                             <apiPackage>com.example.mvcsseemitterconsumer.api</apiPackage>
-                            <modelPackage>com.example.mvcsseemitterconsumer.model</modelPackage>
+                            <modelPackage>com.example.mvcsseemitterconsumer.openapi.model</modelPackage>
                             <generateApis>true</generateApis>
+                            <generateModels>false</generateModels>
                             <generateSupportingFiles>false</generateSupportingFiles>
                             <generateApiDocumentation>false</generateApiDocumentation>
                             <generateApiTests>false</generateApiTests>
