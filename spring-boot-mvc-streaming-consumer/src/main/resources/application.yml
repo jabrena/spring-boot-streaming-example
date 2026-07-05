@@ -14,6 +14,12 @@ spring:
 wikimedia:
   recent-change-url: https://stream.wikimedia.org/v2/stream/recentchange
 
+streaming:
+  cors:
+    allowed-origins:
+      - http://localhost:8080
+      - http://127.0.0.1:8080
+
 management:
   endpoints:
     web:

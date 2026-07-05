@@ -5,24 +5,37 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.0</version>
-        <relativePath/>
+        <groupId>info.jab.ms</groupId>
+        <artifactId>spring-boot-streaming-example</artifactId>
+        <version>0.1.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.example</groupId>
     <artifactId>spring-boot-mvc-streaming-consumer</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>spring-boot-mvc-streaming-consumer</name>
     <description>Spring MVC StreamingResponseBody consumer for Wikimedia recent changes</description>
 
-    <properties>
-        <java.version>25</java.version>
-        <maven.compiler.release>25</maven.compiler.release>
-    </properties>
-
     <dependencies>
+        <dependency>
+            <groupId>info.jab.ms</groupId>
+            <artifactId>openapi-specs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations-jakarta</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc</artifactId>
@@ -41,6 +54,70 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-openapi-spec</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>info.jab.ms</groupId>
+                                    <artifactId>openapi-specs</artifactId>
+                                    <version>${project.version}</version>
+                                    <classifier>openapi</classifier>
+                                    <type>jar</type>
+                                    <includes>openapi.yaml</includes>
+                                    <outputDirectory>${project.build.directory}/openapi-specs</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-openapi-models</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/openapi-specs/openapi.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <output>${project.build.directory}/generated-sources/openapi</output>
+                            <apiPackage>com.example.mvcstreamingconsumer.api</apiPackage>
+                            <modelPackage>com.example.mvcstreamingconsumer.model</modelPackage>
+                            <generateApis>true</generateApis>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateModelTests>false</generateModelTests>
+                            <configOptions>
+                                <generateGenericResponseEntity>true</generateGenericResponseEntity>
+                                <sourceFolder>src/main/java</sourceFolder>
+                                <hideGenerationTimestamp>true</hideGenerationTimestamp>
+                                <interfaceOnly>true</interfaceOnly>
+                                <openApiNullable>false</openApiNullable>
+                                <requestMappingMode>api_interface</requestMappingMode>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <useTags>true</useTags>
+                                <useBeanValidation>false</useBeanValidation>
+                                <useJackson3>true</useJackson3>
+                                <useSpringBoot4>true</useSpringBoot4>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

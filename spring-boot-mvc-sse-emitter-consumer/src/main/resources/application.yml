@@ -1,10 +1,10 @@
 server:
-  port: 8081
+  port: 8083
   shutdown: graceful
 
 spring:
   application:
-    name: spring-boot-weflux-consumer
+    name: spring-boot-mvc-sse-emitter-consumer
   threads:
     virtual:
       enabled: true
@@ -12,8 +12,7 @@ spring:
     timeout-per-shutdown-phase: 30s
 
 wikimedia:
-  base-url: https://stream.wikimedia.org
-  recent-change-path: /v2/stream/recentchange
+  recent-change-url: https://stream.wikimedia.org/v2/stream/recentchange
 
 streaming:
   cors:

@@ -1,0 +1,162 @@
+openapi: 3.0.3
+info:
+  title: Wikipedia Recent Changes Streaming API
+  version: 0.1.0
+  description: Shared OpenAPI contract for the WebFlux, MVC StreamingResponseBody, and MVC SseEmitter services.
+tags:
+  - name: Wikipedia
+    description: Wikimedia recent-change streaming operations.
+servers:
+  - url: http://localhost:8081
+    description: WebFlux service
+  - url: http://localhost:8082
+    description: MVC StreamingResponseBody service
+  - url: http://localhost:8083
+    description: MVC SseEmitter service
+paths:
+  /api/wikipedia/recent-changes:
+    get:
+      tags:
+        - Wikipedia
+      summary: Stream Wikimedia recent-change events
+      operationId: streamRecentChanges
+      description: Returns a Server-Sent Events stream where each event data payload is a recent-change JSON object.
+      parameters:
+        - name: wiki
+          in: query
+          required: false
+          description: Optional Wikimedia wiki id filter, for example enwiki.
+          schema:
+            type: string
+            example: enwiki
+        - name: includeBots
+          in: query
+          required: false
+          description: Include bot-generated changes when true.
+          schema:
+            type: boolean
+            default: false
+        - name: limit
+          in: query
+          required: false
+          description: Optional maximum number of matching events to emit before closing the stream.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            example: 20
+      responses:
+        '200':
+          description: Server-Sent Events stream of recent changes.
+          headers:
+            Cache-Control:
+              description: Instructs clients and proxies not to cache the live stream.
+              schema:
+                type: string
+                example: no-cache
+            X-Accel-Buffering:
+              description: Disables response buffering in compatible reverse proxies.
+              schema:
+                type: string
+                example: 'no'
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: SSE frames whose data field contains a RecentChange JSON object.
+              examples:
+                recentChange:
+                  summary: One SSE frame
+                  value: |-
+                    data:{"wiki":"enwiki","type":"edit","title":"Example","user":"ExampleUser","bot":false}
+
+components:
+  schemas:
+    RecentChange:
+      type: object
+      additionalProperties: true
+      properties:
+        $schema:
+          type: string
+        meta:
+          $ref: '#/components/schemas/Meta'
+        id:
+          type: integer
+          format: int64
+        type:
+          type: string
+        namespace:
+          type: integer
+          format: int32
+        title:
+          type: string
+        title_url:
+          type: string
+          format: uri
+        comment:
+          type: string
+        timestamp:
+          type: integer
+          format: int64
+        user:
+          type: string
+        bot:
+          type: boolean
+        minor:
+          type: boolean
+          nullable: true
+        length:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/ChangeLength'
+        revision:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Revision'
+        server_url:
+          type: string
+          format: uri
+        server_name:
+          type: string
+        server_script_path:
+          type: string
+        wiki:
+          type: string
+        parsedcomment:
+          type: string
+    Meta:
+      type: object
+      additionalProperties: true
+      properties:
+        uri:
+          type: string
+          format: uri
+        request_id:
+          type: string
+        id:
+          type: string
+        domain:
+          type: string
+        stream:
+          type: string
+        dt:
+          type: string
+          format: date-time
+    ChangeLength:
+      type: object
+      properties:
+        old:
+          type: integer
+          format: int32
+        new:
+          type: integer
+          format: int32
+    Revision:
+      type: object
+      properties:
+        old:
+          type: integer
+          format: int64
+        new:
+          type: integer
+          format: int64

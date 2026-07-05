@@ -6,16 +6,16 @@ COPY openapi-specs/pom.xml openapi-specs/pom.xml
 COPY spring-boot-weflux-consumer/pom.xml spring-boot-weflux-consumer/pom.xml
 COPY spring-boot-mvc-streaming-consumer/pom.xml spring-boot-mvc-streaming-consumer/pom.xml
 COPY spring-boot-mvc-sse-emitter-consumer/pom.xml spring-boot-mvc-sse-emitter-consumer/pom.xml
-RUN mvn -B -pl spring-boot-weflux-consumer -am dependency:go-offline
+RUN mvn -B -pl spring-boot-mvc-sse-emitter-consumer -am dependency:go-offline
 
 COPY openapi-specs/src openapi-specs/src
-COPY spring-boot-weflux-consumer/src spring-boot-weflux-consumer/src
-RUN mvn -B -pl spring-boot-weflux-consumer -am package -DskipTests
-RUN java -Djarmode=tools -jar spring-boot-weflux-consumer/target/*.jar extract --layers --destination extracted
+COPY spring-boot-mvc-sse-emitter-consumer/src spring-boot-mvc-sse-emitter-consumer/src
+RUN mvn -B -pl spring-boot-mvc-sse-emitter-consumer -am package -DskipTests
+RUN java -Djarmode=tools -jar spring-boot-mvc-sse-emitter-consumer/target/*.jar extract --layers --destination extracted
 
 FROM eclipse-temurin:25-jdk AS custom-jre
 RUN jlink \
-    --add-modules java.base,java.compiler,java.desktop,java.instrument,java.logging,java.management,java.naming,java.net.http,java.prefs,java.scripting,java.sql,java.xml,jdk.crypto.ec,jdk.jfr,jdk.management,jdk.unsupported \
+    --add-modules java.base,java.compiler,java.desktop,java.instrument,java.logging,java.management,java.naming,java.net.http,java.prefs,java.scripting,java.security.jgss,java.sql,java.xml,jdk.crypto.ec,jdk.jfr,jdk.management,jdk.unsupported \
     --strip-debug \
     --no-header-files \
     --no-man-pages \
@@ -34,9 +34,9 @@ COPY --from=build /workspace/extracted/spring-boot-loader/ ./
 COPY --from=build /workspace/extracted/snapshot-dependencies/ ./
 COPY --from=build /workspace/extracted/application/ ./
 
-EXPOSE 8081
+EXPOSE 8083
 
 HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=5 \
-  CMD wget -q -O - http://localhost:8081/actuator/health > /dev/null || exit 1
+  CMD wget -q -O - http://localhost:8083/actuator/health > /dev/null || exit 1
 
-ENTRYPOINT ["java", "-cp", "/app/*:/app/lib/*", "com.example.wefluxconsumer.MainApplication"]
+ENTRYPOINT ["java", "-cp", "/app/*:/app/lib/*", "com.example.mvcsseemitterconsumer.MainApplication"]

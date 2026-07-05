@@ -13,31 +13,41 @@ docker compose up --build
 
 Docker Compose starts:
 
-- `wikipedia-service`: Spring Boot WebFlux API on `http://localhost:8080`
-- `wikipedia-mvc-service`: Spring MVC API on `http://localhost:8082`
-- `streaming-html-client`: HTML/JavaScript client on `http://localhost:8081`
+- `streaming-html-client`: HTML/JavaScript client on `http://localhost:8080`
+- `wikipedia-webflux-service`: Spring Boot WebFlux API on `http://localhost:8081`
+- `wikipedia-mvc-service`: Spring MVC `StreamingResponseBody` API on `http://localhost:8082`
+- `wikipedia-mvc-sse-emitter-service`: Spring MVC `SseEmitter` API on `http://localhost:8083`
 
-Both Spring services run on Java 25 with virtual threads enabled. Their runtime
+All Spring services run on Java 25 with virtual threads enabled. Their runtime
 containers use BellSoft Alpaquita base images, Spring Boot layered extraction,
 and a custom `jlink` Java runtime to keep image size small. Container health
 checks use the `wget` binary already available in the base image, so no extra
-`curl` package is installed. The HTML client waits until both Spring Boot
+`curl` package is installed. The HTML client waits until all Spring Boot
 services are healthy before starting.
+
+The Maven root project binds the three Spring Boot services and a shared
+`openapi-specs` module. Each service depends on that module and serves the same
+OpenAPI contract at `/openapi.yaml`. The `openapi-specs` module packages the
+contract only; each Spring service unpacks its `openapi` classifier and generates
+a local API interface during the Maven build. The MVC consumers also generate
+local model classes, while the WebFlux consumer keeps its reactive model code
+local. All controllers implement the generated interfaces.
 
 ## Visualize The Stream
 
 Open:
 
 ```text
-http://localhost:8081
+http://localhost:8080
 ```
 
 Click `Connect` to start receiving live Wikipedia recent-change events.
 
 Use the `Source` selector to choose the backend implementation:
 
-- `WebFlux`: `http://localhost:8080/api/wikipedia/recent-changes`
-- `MVC`: `http://localhost:8082/api/wikipedia/recent-changes`
+- `WebFlux`: `http://localhost:8081/api/wikipedia/recent-changes`
+- `MVC StreamingResponseBody`: `http://localhost:8082/api/wikipedia/recent-changes`
+- `MVC SseEmitter`: `http://localhost:8083/api/wikipedia/recent-changes`
 
 ## Local Streaming Endpoint
 
@@ -50,10 +60,11 @@ GET /api/wikipedia/recent-changes
 Useful examples:
 
 ```bash
-curl -N "http://localhost:8080/api/wikipedia/recent-changes?limit=2"
+curl -N "http://localhost:8081/api/wikipedia/recent-changes?limit=2"
 curl -N "http://localhost:8082/api/wikipedia/recent-changes?limit=2"
-curl -N "http://localhost:8080/api/wikipedia/recent-changes?wiki=enwiki&limit=5"
-curl -N "http://localhost:8080/api/wikipedia/recent-changes?wiki=enwiki&includeBots=true&limit=5"
+curl -N "http://localhost:8083/api/wikipedia/recent-changes?limit=2"
+curl -N "http://localhost:8081/api/wikipedia/recent-changes?wiki=enwiki&limit=5"
+curl -N "http://localhost:8081/api/wikipedia/recent-changes?wiki=enwiki&includeBots=true&limit=5"
 ```
 
 Stop everything:
@@ -81,6 +92,14 @@ https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams_HTTP_Service
 
 ## OpenAPI And Schema
 
+Local shared OpenAPI specification:
+
+```text
+http://localhost:8081/openapi.yaml
+http://localhost:8082/openapi.yaml
+http://localhost:8083/openapi.yaml
+```
+
 Wikimedia EventStreams OpenAPI:
 
 ```text
@@ -98,3 +117,7 @@ Recent-change event JSON schema:
 ```text
 https://schema.wikimedia.org/repositories/primary/jsonschema/mediawiki/recentchange/latest
 ```
+
+## References
+
+- https://openapi-generator.tech/

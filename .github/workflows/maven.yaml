@@ -14,9 +14,5 @@ jobs:
         with:
           distribution: 'graalvm' # See 'Supported distributions' for available options
           java-version: '25'
-      - name: Maven build WebFlux
-        working-directory: ./spring-boot-weflux-consumer
+      - name: Maven build
         run: ./mvnw --batch-mode --no-transfer-progress verify
-      - name: Maven build MVC
-        working-directory: ./spring-boot-mvc-streaming-consumer
-        run: mvn --batch-mode --no-transfer-progress verify

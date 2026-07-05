@@ -36,7 +36,7 @@ public class WikimediaRecentChangeStreamingClient {
         return outputStream -> {
             HttpRequest request = HttpRequest.newBuilder(URI.create(properties.recentChangeUrl()))
                     .header("Accept", MediaType.TEXT_EVENT_STREAM_VALUE)
-                    .header("User-Agent", "spring-boot-streaming-example/0.0.1")
+                    .header("User-Agent", "spring-boot-streaming-example/0.1.0")
                     .GET()
                     .build();
 
@@ -80,7 +80,7 @@ public class WikimediaRecentChangeStreamingClient {
     }
 
     private boolean matches(RecentChange change, String wiki, boolean includeBots) {
-        return (wiki == null || wiki.equalsIgnoreCase(change.wiki()))
-                && (includeBots || !Boolean.TRUE.equals(change.bot()));
+        return (wiki == null || wiki.equalsIgnoreCase(change.getWiki()))
+                && (includeBots || !Boolean.TRUE.equals(change.getBot()));
     }
 }

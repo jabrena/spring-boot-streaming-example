@@ -1,6 +1,7 @@
 const endpoints = {
-  webflux: 'http://localhost:8080/api/wikipedia/recent-changes',
-  mvc: 'http://localhost:8082/api/wikipedia/recent-changes'
+  webflux: 'http://localhost:8081/api/wikipedia/recent-changes',
+  mvc: 'http://localhost:8082/api/wikipedia/recent-changes',
+  mvcSseEmitter: 'http://localhost:8083/api/wikipedia/recent-changes'
 };
 
 function buildUrl(filters) {

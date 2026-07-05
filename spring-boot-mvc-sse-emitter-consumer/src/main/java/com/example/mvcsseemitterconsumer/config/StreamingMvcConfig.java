@@ -1,4 +1,4 @@
-package com.example.mvcstreamingconsumer.config;
+package com.example.mvcsseemitterconsumer.config;
 
 import org.apache.coyote.ProtocolHandler;
 import org.springframework.boot.tomcat.TomcatProtocolHandlerCustomizer;
@@ -20,7 +20,7 @@ public class StreamingMvcConfig {
     @Bean(destroyMethod = "close")
     ExecutorService mvcVirtualThreadExecutor() {
         return java.util.concurrent.Executors.newThreadPerTaskExecutor(
-                Thread.ofVirtual().name("mvc-virtual-", 0).factory());
+                Thread.ofVirtual().name("mvc-sse-virtual-", 0).factory());
     }
 
     @Bean

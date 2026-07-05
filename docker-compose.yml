@@ -1,13 +1,14 @@
 services:
-  wikipedia-service:
+  wikipedia-webflux-service:
     build:
-      context: ./spring-boot-weflux-consumer
-    container_name: wikipedia-service
+      context: .
+      dockerfile: spring-boot-weflux-consumer/Dockerfile
+    container_name: wikipedia-webflux-service
     stop_grace_period: 35s
     ports:
-      - "8080:8080"
+      - "8081:8081"
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/actuator/health > /dev/null || exit 1"]
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8081/actuator/health > /dev/null || exit 1"]
       interval: 10s
       timeout: 3s
       start_period: 30s
@@ -15,7 +16,8 @@ services:
 
   wikipedia-mvc-service:
     build:
-      context: ./spring-boot-mvc-streaming-consumer
+      context: .
+      dockerfile: spring-boot-mvc-streaming-consumer/Dockerfile
     container_name: wikipedia-mvc-service
     stop_grace_period: 35s
     ports:
@@ -27,14 +29,31 @@ services:
       start_period: 30s
       retries: 5
 
+  wikipedia-mvc-sse-emitter-service:
+    build:
+      context: .
+      dockerfile: spring-boot-mvc-sse-emitter-consumer/Dockerfile
+    container_name: wikipedia-mvc-sse-emitter-service
+    stop_grace_period: 35s
+    ports:
+      - "8083:8083"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8083/actuator/health > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 3s
+      start_period: 30s
+      retries: 5
+
   streaming-html-client:
     build:
       context: ./streaming-html-client
     container_name: streaming-html-client
     depends_on:
-      wikipedia-service:
+      wikipedia-webflux-service:
         condition: service_healthy
       wikipedia-mvc-service:
         condition: service_healthy
+      wikipedia-mvc-sse-emitter-service:
+        condition: service_healthy
     ports:
-      - "8081:80"
+      - "8080:80"

@@ -2,11 +2,16 @@ FROM maven:3.9.11-eclipse-temurin-25 AS build
 WORKDIR /workspace
 
 COPY pom.xml .
-RUN mvn -B dependency:go-offline
+COPY openapi-specs/pom.xml openapi-specs/pom.xml
+COPY spring-boot-weflux-consumer/pom.xml spring-boot-weflux-consumer/pom.xml
+COPY spring-boot-mvc-streaming-consumer/pom.xml spring-boot-mvc-streaming-consumer/pom.xml
+COPY spring-boot-mvc-sse-emitter-consumer/pom.xml spring-boot-mvc-sse-emitter-consumer/pom.xml
+RUN mvn -B -pl spring-boot-mvc-streaming-consumer -am dependency:go-offline
 
-COPY src ./src
-RUN mvn -B package -DskipTests
-RUN java -Djarmode=tools -jar target/*.jar extract --layers --destination extracted
+COPY openapi-specs/src openapi-specs/src
+COPY spring-boot-mvc-streaming-consumer/src spring-boot-mvc-streaming-consumer/src
+RUN mvn -B -pl spring-boot-mvc-streaming-consumer -am package -DskipTests
+RUN java -Djarmode=tools -jar spring-boot-mvc-streaming-consumer/target/*.jar extract --layers --destination extracted
 
 FROM eclipse-temurin:25-jdk AS custom-jre
 RUN jlink \
