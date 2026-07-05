@@ -1,7 +1,8 @@
-package com.example.wefluxconsumer.client;
+package com.example.wefluxconsumer.adapter.out.wikimedia;
 
+import com.example.wefluxconsumer.application.port.out.RecentChangeStreamPort;
 import com.example.wefluxconsumer.config.WikimediaProperties;
-import com.example.wefluxconsumer.model.RecentChange;
+import com.example.wefluxconsumer.domain.model.RecentChange;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
@@ -9,9 +10,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
 @Service
-public class WikimediaRecentChangeClient {
+public class WikimediaRecentChangeClient implements RecentChangeStreamPort {
 
-    private static final ParameterizedTypeReference<ServerSentEvent<RecentChange>> RECENT_CHANGE_SSE =
+    private static final ParameterizedTypeReference<ServerSentEvent<WikimediaRecentChangeEvent>> RECENT_CHANGE_SSE =
             new ParameterizedTypeReference<>() {
             };
 
@@ -23,11 +24,13 @@ public class WikimediaRecentChangeClient {
         this.properties = properties;
     }
 
+    @Override
     public Flux<RecentChange> streamRecentChanges() {
         return webClient.get()
                 .uri(properties.recentChangePath())
                 .retrieve()
                 .bodyToFlux(RECENT_CHANGE_SSE)
-                .mapNotNull(ServerSentEvent::data);
+                .mapNotNull(ServerSentEvent::data)
+                .map(WikimediaRecentChangeEvent::toDomain);
     }
 }

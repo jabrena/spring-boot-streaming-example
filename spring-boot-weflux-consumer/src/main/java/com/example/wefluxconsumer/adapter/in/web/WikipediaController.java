@@ -1,8 +1,8 @@
-package com.example.wefluxconsumer.controller;
+package com.example.wefluxconsumer.adapter.in.web;
 
 import com.example.wefluxconsumer.api.WikipediaApi;
-import com.example.wefluxconsumer.client.WikimediaRecentChangeClient;
-import com.example.wefluxconsumer.model.RecentChange;
+import com.example.wefluxconsumer.application.port.in.RecentChangeQuery;
+import com.example.wefluxconsumer.application.port.in.StreamRecentChangesUseCase;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +13,10 @@ import reactor.core.publisher.Mono;
 @RestController
 public class WikipediaController implements WikipediaApi {
 
-    private final WikimediaRecentChangeClient client;
+    private final StreamRecentChangesUseCase useCase;
 
-    public WikipediaController(WikimediaRecentChangeClient client) {
-        this.client = client;
+    public WikipediaController(StreamRecentChangesUseCase useCase) {
+        this.useCase = useCase;
     }
 
     @Override
@@ -25,13 +25,8 @@ public class WikipediaController implements WikipediaApi {
             Boolean includeBots,
             Long limit
     ) {
-        Flux<RecentChange> stream = client.streamRecentChanges()
-                .filter(change -> wiki == null || wiki.equalsIgnoreCase(change.wiki()))
-                .filter(change -> Boolean.TRUE.equals(includeBots) || !Boolean.TRUE.equals(change.bot()));
-
-        if (limit != null) {
-            stream = stream.take(limit);
-        }
+        Flux<RecentChangeResponse> stream = useCase.streamRecentChanges(new RecentChangeQuery(wiki, includeBots, limit))
+                .map(RecentChangeResponse::fromDomain);
 
         return Mono.just(ResponseEntity.ok()
                 .contentType(MediaType.TEXT_EVENT_STREAM)

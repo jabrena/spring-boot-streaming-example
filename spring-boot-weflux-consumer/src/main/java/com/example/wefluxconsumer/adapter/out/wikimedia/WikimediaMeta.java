@@ -1,10 +1,11 @@
-package com.example.wefluxconsumer.model;
+package com.example.wefluxconsumer.adapter.out.wikimedia;
 
+import com.example.wefluxconsumer.domain.model.Meta;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record Meta(
+public record WikimediaMeta(
         String uri,
         @JsonProperty("request_id")
         String requestId,
@@ -13,4 +14,8 @@ public record Meta(
         String stream,
         String dt
 ) {
+
+    Meta toDomain() {
+        return new Meta(uri, requestId, id, domain, stream, dt);
+    }
 }
