@@ -17,24 +17,26 @@ Docker Compose starts:
 - `wikipedia-webflux-service`: Spring Boot WebFlux API on `http://localhost:8081`
 - `wikipedia-mvc-service`: Spring MVC `StreamingResponseBody` API on `http://localhost:8082`
 - `wikipedia-mvc-sse-emitter-service`: Spring MVC `SseEmitter` API on `http://localhost:8083`
+- `wikipedia-quarkus-service`: Quarkus REST API on `http://localhost:8084`
 
-All Spring services run on Java 25 with virtual threads enabled. Their runtime
-containers use BellSoft Alpaquita base images, Spring Boot layered extraction,
-and a custom `jlink` Java runtime to keep image size small. Container health
-checks use the `wget` binary already available in the base image, so no extra
-`curl` package is installed. The HTML client waits until all Spring Boot
-services are healthy before starting.
+All backend services run on Java 25. The Spring services enable virtual threads,
+and the Quarkus service uses virtual threads for each upstream SSE subscription.
+Their runtime containers use BellSoft Alpaquita base images and custom `jlink`
+Java runtimes to keep image size small. Container health checks use the `wget`
+binary already available in the base image, so no extra `curl` package is
+installed. The HTML client waits until all backend services are healthy before
+starting.
 
-The Maven root project binds the three Spring Boot services and a shared
-`openapi-specs` module. Each service depends on that module and serves the same
-output OpenAPI contract at `/openapi.yaml`. The `openapi-specs` module packages
-that downstream service contract from `downstream/openapi.yaml` plus the
-upstream Wikimedia EventStreams contract in
+The Maven root project binds the three Spring Boot services, the Quarkus service,
+and a shared `openapi-specs` module. Each service depends on that module and
+serves the same output OpenAPI contract at `/openapi.yaml`. The `openapi-specs`
+module packages that downstream service contract from `downstream/openapi.yaml`
+plus the upstream Wikimedia EventStreams contract in
 `upstream/wikimedia-eventstreams-openapi.yaml`. Each Spring service unpacks the
 module's `openapi` classifier and generates a local API interface from the
 downstream contract during the Maven build. The MVC consumers also generate
-local model classes, while the WebFlux consumer keeps its reactive model code
-local. All controllers implement the generated interfaces.
+local model classes, while the WebFlux and Quarkus consumers keep their reactive
+model code local.
 
 ## Visualize The Stream
 
@@ -51,6 +53,7 @@ Use the `Source` selector to choose the backend implementation:
 - `WebFlux`: `http://localhost:8081/api/wikipedia/recent-changes`
 - `MVC StreamingResponseBody`: `http://localhost:8082/api/wikipedia/recent-changes`
 - `MVC SseEmitter`: `http://localhost:8083/api/wikipedia/recent-changes`
+- `Quarkus REST`: `http://localhost:8084/api/wikipedia/recent-changes`
 
 ## Local Streaming Endpoint
 
@@ -66,6 +69,7 @@ Useful examples:
 curl -N "http://localhost:8081/api/wikipedia/recent-changes?limit=2"
 curl -N "http://localhost:8082/api/wikipedia/recent-changes?limit=2"
 curl -N "http://localhost:8083/api/wikipedia/recent-changes?limit=2"
+curl -N "http://localhost:8084/api/wikipedia/recent-changes?limit=2"
 curl -N "http://localhost:8081/api/wikipedia/recent-changes?wiki=enwiki&limit=5"
 curl -N "http://localhost:8081/api/wikipedia/recent-changes?wiki=enwiki&includeBots=true&limit=5"
 ```
@@ -76,8 +80,8 @@ Stop everything:
 docker compose down
 ```
 
-The Spring Boot services use graceful shutdown with a 30-second shutdown phase,
-and Docker Compose gives each service 35 seconds before forcing termination.
+The backend services use graceful shutdown with a 30-second shutdown phase, and
+Docker Compose gives each service 35 seconds before forcing termination.
 
 ## Data Source
 
@@ -101,6 +105,7 @@ Local output OpenAPI specification exposed by this project:
 http://localhost:8081/openapi.yaml
 http://localhost:8082/openapi.yaml
 http://localhost:8083/openapi.yaml
+http://localhost:8084/openapi.yaml
 ```
 
 Packaged upstream input OpenAPI specification:

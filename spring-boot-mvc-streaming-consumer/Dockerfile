@@ -6,6 +6,7 @@ COPY openapi-specs/pom.xml openapi-specs/pom.xml
 COPY spring-boot-weflux-consumer/pom.xml spring-boot-weflux-consumer/pom.xml
 COPY spring-boot-mvc-streaming-consumer/pom.xml spring-boot-mvc-streaming-consumer/pom.xml
 COPY spring-boot-mvc-sse-emitter-consumer/pom.xml spring-boot-mvc-sse-emitter-consumer/pom.xml
+COPY quarkus-streaming-consumer/pom.xml quarkus-streaming-consumer/pom.xml
 RUN mvn -B -pl spring-boot-mvc-streaming-consumer -am dependency:go-offline
 
 COPY openapi-specs/src openapi-specs/src
@@ -39,4 +40,4 @@ EXPOSE 8082
 HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=5 \
   CMD wget -q -O - http://localhost:8082/actuator/health > /dev/null || exit 1
 
-ENTRYPOINT ["java", "-cp", "/app/*:/app/lib/*", "com.example.mvcstreamingconsumer.MainApplication"]
+ENTRYPOINT ["java", "-cp", "/app/*:/app/lib/*", "info.jab.ms.MainApplication"]

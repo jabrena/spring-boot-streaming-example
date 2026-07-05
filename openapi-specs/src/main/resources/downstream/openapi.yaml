@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Wikipedia Recent Changes Streaming API
   version: 0.1.0
-  description: Shared OpenAPI contract for the WebFlux, MVC StreamingResponseBody, and MVC SseEmitter services.
+  description: Shared OpenAPI contract for the WebFlux, MVC StreamingResponseBody, MVC SseEmitter, and Quarkus services.
 tags:
   - name: Wikipedia
     description: Wikimedia recent-change streaming operations.
@@ -13,6 +13,8 @@ servers:
     description: MVC StreamingResponseBody service
   - url: http://localhost:8083
     description: MVC SseEmitter service
+  - url: http://localhost:8084
+    description: Quarkus REST service
 paths:
   /api/wikipedia/recent-changes:
     get:

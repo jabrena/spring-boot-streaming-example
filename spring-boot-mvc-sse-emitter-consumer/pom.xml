@@ -50,6 +50,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -93,8 +98,9 @@
                             <inputSpec>${project.build.directory}/openapi-specs/downstream/openapi.yaml</inputSpec>
                             <generatorName>spring</generatorName>
                             <output>${project.build.directory}/generated-sources/openapi</output>
-                            <apiPackage>com.example.mvcsseemitterconsumer.api</apiPackage>
-                            <modelPackage>com.example.mvcsseemitterconsumer.openapi.model</modelPackage>
+                            <apiPackage>info.jab.ms.api</apiPackage>
+                            <invokerPackage>info.jab.ms</invokerPackage>
+                            <modelPackage>info.jab.ms.openapi.model</modelPackage>
                             <generateApis>true</generateApis>
                             <generateModels>false</generateModels>
                             <generateSupportingFiles>false</generateSupportingFiles>

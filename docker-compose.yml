@@ -1,5 +1,9 @@
+x-container-limits: &container-limits
+  mem_limit: 1g
+
 services:
   wikipedia-webflux-service:
+    <<: *container-limits
     build:
       context: .
       dockerfile: spring-boot-weflux-consumer/Dockerfile
@@ -15,6 +19,7 @@ services:
       retries: 5
 
   wikipedia-mvc-service:
+    <<: *container-limits
     build:
       context: .
       dockerfile: spring-boot-mvc-streaming-consumer/Dockerfile
@@ -30,6 +35,7 @@ services:
       retries: 5
 
   wikipedia-mvc-sse-emitter-service:
+    <<: *container-limits
     build:
       context: .
       dockerfile: spring-boot-mvc-sse-emitter-consumer/Dockerfile
@@ -44,7 +50,24 @@ services:
       start_period: 30s
       retries: 5
 
+  wikipedia-quarkus-service:
+    <<: *container-limits
+    build:
+      context: .
+      dockerfile: quarkus-streaming-consumer/Dockerfile
+    container_name: wikipedia-quarkus-service
+    stop_grace_period: 35s
+    ports:
+      - "8084:8084"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8084/q/health/live > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 3s
+      start_period: 30s
+      retries: 5
+
   streaming-html-client:
+    <<: *container-limits
     build:
       context: ./streaming-html-client
     container_name: streaming-html-client
@@ -54,6 +77,8 @@ services:
       wikipedia-mvc-service:
         condition: service_healthy
       wikipedia-mvc-sse-emitter-service:
+        condition: service_healthy
+      wikipedia-quarkus-service:
         condition: service_healthy
     ports:
       - "8080:80"

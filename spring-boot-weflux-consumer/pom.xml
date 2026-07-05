@@ -51,6 +51,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
@@ -98,8 +103,9 @@
                             <inputSpec>${project.build.directory}/openapi-specs/downstream/openapi.yaml</inputSpec>
                             <generatorName>spring</generatorName>
                             <output>${project.build.directory}/generated-sources/openapi</output>
-                            <apiPackage>com.example.wefluxconsumer.api</apiPackage>
-                            <modelPackage>com.example.wefluxconsumer.openapi.model</modelPackage>
+                            <apiPackage>info.jab.ms.api</apiPackage>
+                            <invokerPackage>info.jab.ms</invokerPackage>
+                            <modelPackage>info.jab.ms.openapi.model</modelPackage>
                             <generateApis>true</generateApis>
                             <generateModels>false</generateModels>
                             <generateSupportingFiles>false</generateSupportingFiles>
