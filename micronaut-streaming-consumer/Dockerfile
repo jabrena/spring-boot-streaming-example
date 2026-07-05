@@ -3,10 +3,10 @@ WORKDIR /workspace
 
 COPY pom.xml .
 COPY openapi-specs openapi-specs
-COPY quarkus-streaming-consumer quarkus-streaming-consumer
+COPY micronaut-streaming-consumer micronaut-streaming-consumer
 RUN mvn -B -N install \
     && mvn -B -f openapi-specs/pom.xml install -DskipTests \
-    && mvn -B -f quarkus-streaming-consumer/pom.xml package -DskipTests
+    && mvn -B -f micronaut-streaming-consumer/pom.xml package -DskipTests
 
 FROM eclipse-temurin:25-jdk AS custom-jre
 RUN jlink \
@@ -25,15 +25,12 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
 
 COPY --from=custom-jre /custom-jre ${JAVA_HOME}
-COPY --from=build --chown=10001:10001 /workspace/quarkus-streaming-consumer/target/quarkus-app/lib/ /app/lib/
-COPY --from=build --chown=10001:10001 /workspace/quarkus-streaming-consumer/target/quarkus-app/*.jar /app/
-COPY --from=build --chown=10001:10001 /workspace/quarkus-streaming-consumer/target/quarkus-app/app/ /app/app/
-COPY --from=build --chown=10001:10001 /workspace/quarkus-streaming-consumer/target/quarkus-app/quarkus/ /app/quarkus/
+COPY --from=build --chown=10001:10001 /workspace/micronaut-streaming-consumer/target/micronaut-streaming-consumer-0.1.0.jar /app/app.jar
 
-EXPOSE 8084
+EXPOSE 8085
 USER 10001:10001
 
 HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=5 \
-  CMD wget -q -O - http://localhost:8084/q/health/live > /dev/null || exit 1
+  CMD wget -q -O - http://localhost:8085/health > /dev/null || exit 1
 
-ENTRYPOINT ["java", "-jar", "/app/quarkus-run.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

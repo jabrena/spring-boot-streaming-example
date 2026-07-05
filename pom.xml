@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>info.jab.ms</groupId>
-    <artifactId>spring-boot-streaming-example</artifactId>
+    <artifactId>multi-framework-streaming-example</artifactId>
     <version>0.1.0</version>
     <packaging>pom</packaging>
 
-    <name>spring-boot-streaming-example-parent</name>
-    <description>Parent build for Spring Boot streaming examples</description>
+    <name>multi-framework-streaming-example-parent</name>
+    <description>Parent build for multi-framework Java streaming examples</description>
 
     <modules>
         <module>openapi-specs</module>
@@ -18,6 +18,7 @@
         <module>spring-boot-mvc-streaming-consumer</module>
         <module>spring-boot-mvc-sse-emitter-consumer</module>
         <module>quarkus-streaming-consumer</module>
+        <module>micronaut-streaming-consumer</module>
     </modules>
 
     <properties>
@@ -26,6 +27,9 @@
         <maven.compiler.release>25</maven.compiler.release>
         <maven-dependency-plugin.version>3.9.0</maven-dependency-plugin.version>
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+        <micronaut-maven-plugin.version>5.0.0</micronaut-maven-plugin.version>
+        <micronaut.version>5.0.3</micronaut.version>
+        <micronaut.core.version>5.0.4</micronaut.core.version>
         <openapi-generator-maven-plugin.version>7.23.0</openapi-generator-maven-plugin.version>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -49,6 +53,13 @@
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>${quarkus.platform.artifact-id}</artifactId>
                 <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.micronaut.platform</groupId>
+                <artifactId>micronaut-platform</artifactId>
+                <version>${micronaut.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -92,6 +103,11 @@
                     <groupId>${quarkus.platform.group-id}</groupId>
                     <artifactId>quarkus-maven-plugin</artifactId>
                     <version>${quarkus.platform.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>io.micronaut.maven</groupId>
+                    <artifactId>micronaut-maven-plugin</artifactId>
+                    <version>${micronaut-maven-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.springframework.boot</groupId>

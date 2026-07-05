@@ -2,7 +2,8 @@ const endpoints = {
   webflux: 'http://localhost:8081/api/wikipedia/recent-changes',
   mvc: 'http://localhost:8082/api/wikipedia/recent-changes',
   mvcSseEmitter: 'http://localhost:8083/api/wikipedia/recent-changes',
-  quarkus: 'http://localhost:8084/api/wikipedia/recent-changes'
+  quarkus: 'http://localhost:8084/api/wikipedia/recent-changes',
+  micronaut: 'http://localhost:8085/api/wikipedia/recent-changes'
 };
 
 function buildUrl(filters) {

@@ -3,13 +3,10 @@ package info.jab.ms.adapter.out.wikimedia;
 import info.jab.ms.application.port.out.RecentChangeStreamPort;
 import info.jab.ms.config.WikimediaProperties;
 import info.jab.ms.domain.model.RecentChange;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.subscription.BackPressureStrategy;
-import io.smallrye.mutiny.subscription.MultiEmitter;
+import io.micronaut.json.JsonMapper;
 import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -19,32 +16,34 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Stream;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 
-@ApplicationScoped
+@Singleton
 public class WikimediaRecentChangeClient implements RecentChangeStreamPort {
 
     private final HttpClient httpClient;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final WikimediaProperties properties;
     private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
     @Inject
     public WikimediaRecentChangeClient(
             HttpClient wikimediaHttpClient,
-            ObjectMapper objectMapper,
+            JsonMapper jsonMapper,
             WikimediaProperties properties
     ) {
         this.httpClient = wikimediaHttpClient;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
         this.properties = properties;
     }
 
     @Override
-    public Multi<RecentChange> streamRecentChanges() {
-        return Multi.createFrom().emitter(emitter -> {
-            Future<?> task = executor.submit(() -> streamRecentChanges(emitter));
-            emitter.onTermination(() -> task.cancel(true));
-        }, BackPressureStrategy.BUFFER);
+    public Flux<RecentChange> streamRecentChanges() {
+        return Flux.create(sink -> {
+            Future<?> task = executor.submit(() -> streamRecentChanges(sink));
+            sink.onDispose(() -> task.cancel(true));
+        }, FluxSink.OverflowStrategy.BUFFER);
     }
 
     @PreDestroy
@@ -52,7 +51,7 @@ public class WikimediaRecentChangeClient implements RecentChangeStreamPort {
         executor.shutdownNow();
     }
 
-    private void streamRecentChanges(MultiEmitter<? super RecentChange> emitter) {
+    private void streamRecentChanges(FluxSink<? super RecentChange> sink) {
         HttpRequest request = HttpRequest.newBuilder(properties.recentChangeUri())
                 .header("Accept", "text/event-stream")
                 .header("User-Agent", "multi-framework-streaming-example/0.1.0")
@@ -62,36 +61,36 @@ public class WikimediaRecentChangeClient implements RecentChangeStreamPort {
         try {
             HttpResponse<Stream<String>> response = httpClient.send(request, HttpResponse.BodyHandlers.ofLines());
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                emitter.fail(new IllegalStateException(
+                sink.error(new IllegalStateException(
                         "Wikimedia stream returned HTTP status " + response.statusCode()
                 ));
                 return;
             }
 
             try (Stream<String> lines = response.body()) {
-                readSseLines(lines, emitter);
+                readSseLines(lines, sink);
             }
-            emitter.complete();
+            sink.complete();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            emitter.complete();
+            sink.complete();
         } catch (Exception e) {
             if (Thread.currentThread().isInterrupted()) {
-                emitter.complete();
+                sink.complete();
             } else {
-                emitter.fail(e);
+                sink.error(e);
             }
         }
     }
 
-    private void readSseLines(Stream<String> lines, MultiEmitter<? super RecentChange> emitter) throws IOException {
+    private void readSseLines(Stream<String> lines, FluxSink<? super RecentChange> sink) throws IOException {
         StringBuilder data = new StringBuilder();
         Iterator<String> iterator = lines.iterator();
 
-        while (!Thread.currentThread().isInterrupted() && iterator.hasNext()) {
+        while (!Thread.currentThread().isInterrupted() && !sink.isCancelled() && iterator.hasNext()) {
             String line = iterator.next();
             if (line.isEmpty()) {
-                emitData(data, emitter);
+                emitData(data, sink);
                 data.setLength(0);
             } else if (line.startsWith("data:")) {
                 if (!data.isEmpty()) {
@@ -101,15 +100,15 @@ public class WikimediaRecentChangeClient implements RecentChangeStreamPort {
             }
         }
 
-        emitData(data, emitter);
+        emitData(data, sink);
     }
 
-    private void emitData(StringBuilder data, MultiEmitter<? super RecentChange> emitter) throws IOException {
-        if (data.isEmpty()) {
+    private void emitData(StringBuilder data, FluxSink<? super RecentChange> sink) throws IOException {
+        if (data.isEmpty() || sink.isCancelled()) {
             return;
         }
 
-        WikimediaRecentChangeEvent event = objectMapper.readValue(data.toString(), WikimediaRecentChangeEvent.class);
-        emitter.emit(event.toDomain());
+        WikimediaRecentChangeEvent event = jsonMapper.readValue(data.toString(), WikimediaRecentChangeEvent.class);
+        sink.next(event.toDomain());
     }
 }

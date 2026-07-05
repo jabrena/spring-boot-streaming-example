@@ -39,7 +39,7 @@ public class WikimediaRecentChangeStreamingClient implements RecentChangeStreamP
     public Stream<RecentChange> streamRecentChanges() {
         HttpRequest request = HttpRequest.newBuilder(URI.create(properties.recentChangeUrl()))
                 .header("Accept", MediaType.TEXT_EVENT_STREAM_VALUE)
-                .header("User-Agent", "spring-boot-streaming-example/0.1.0")
+                .header("User-Agent", "multi-framework-streaming-example/0.1.0")
                 .GET()
                 .build();
 
